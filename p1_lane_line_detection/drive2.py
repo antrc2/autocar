@@ -1,51 +1,23 @@
 import asyncio
 import websockets
-from PIL import Image
 import json
-import cv2
-import numpy as np
-import base64
-from io import BytesIO
 import time
-from lane_line_detection import calculate_control_signal
-
 async def echo(websocket, path):
-    # nowTime = time.time()
-    async for message in websocket:
-        # Get image from simulation
-        # data = json.loads(message)
-        # image = Image.open(BytesIO(base64.b64decode(data["image"])))
-        # image = np.asarray(image)
-        # image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
-
-        # # Prepare visualization image
-        # draw = image.copy()
-
-        # # Send back throttle and steering angle
-        # throttle, steering_angle = calculate_control_signal(image, draw=draw)
-
-        # # Show the result to a window
-        # cv2.imshow("Result", draw)
-        # cv2.waitKey(1)
-        
-        # Send back throttle and steering angle
+    with open('data.txt', mode='r', encoding='utf-8') as f:
+        data = f.read().split("\n")
+    for i in data:
+        new_data = i.split()
+        throttle = new_data[0]
+        steering_angle = new_data[1]
+        ti = float(new_data[2])  # Thời gian ngắt quãng khi gửi socket
+          # Gửi Socket lên sau mỗi ti
+        # time.sleep(ti)
         message = json.dumps({"throttle": throttle, "steering": steering_angle})
-            # data = data2.split()
-            # throttle = data[0]
-            # steering_angle = data[1]
-            # ti = data[2]
-        
-        # print(time.time() - nowTime)
+        await asyncio.sleep(ti)
         await websocket.send(message)
         
 
 async def main():
     async with websockets.serve(echo, "0.0.0.0", 4567, ping_interval=None):
-        await asyncio.Future()  # run forever
-
-# asyncio.run(main())
-with open('data.txt', mode='r', encoding='utf-8', errors='ignore', buffering=1, newline=None, closefd=True, opener=None) as f:
-    data2 = f.read().split("\n")
-    print(data2)
-    for i in data2:
-        print(i)
+        await asyncio.Future()
+asyncio.run(main())

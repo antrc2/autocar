@@ -158,7 +158,7 @@ def calculate_control_signal(img, draw=None):
         # Calculate steering angle
         # You can apply some advanced control algorithm here
         # For examples, PID
-        steering_angle = - float(center_diff * 0.005)
+        steering_angle = - float(center_diff * 0.01)
     # Nếu rẽ thì giảm tốc độ
     center_interested_line_two = (left_point+right_point)/2
     center_interested_line_one = (left_point_rotate+right_point_rotate)/2
