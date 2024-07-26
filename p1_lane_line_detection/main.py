@@ -7,15 +7,13 @@ import numpy as np
 import base64
 from io import BytesIO
 import time
-import os
 import keyboard
 from lane_line_detection import calculate_control_signal
+
 running = False
+
 async def echo(websocket, path):
-    f = open("data.txt","w")
-    count=0
     async for message in websocket:
-        nowTime = time.time()
         # Get image from simulation
         data = json.loads(message)
         image = Image.open(BytesIO(base64.b64decode(data["image"])))
@@ -26,7 +24,7 @@ async def echo(websocket, path):
         draw = image.copy()
         
         # Send back throttle and steering angle
-        throttle, steering_angle = calculate_control_signal(image,draw=draw)
+        throttle, steering_angle = calculate_control_signal(image, draw=draw)
 
         # Show the result to a window
         cv2.imshow("Result", draw)
@@ -34,13 +32,9 @@ async def echo(websocket, path):
         
         # Send back throttle and steering angle
         message = json.dumps({"throttle": throttle, "steering": steering_angle})
+        # print(message)
         
-        count+=1
-        print(count)
         await websocket.send(message)
-        f.write(f"{throttle} {steering_angle} {time.time() - nowTime}\n")
-        
-        
 
 async def main():
     async with websockets.serve(echo, "0.0.0.0", 4567, ping_interval=None):
